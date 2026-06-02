@@ -13,9 +13,6 @@ print("="*85)
 print(" HỆ THỐNG GỢI Ý CÂY TRỒNG TÍCH HỢP HỌC MÁY & SOFT PENALTY ".center(85))
 print("="*85 + "\n")
 
-# ==========================================
-# 1. TIỀN XỬ LÝ & LỰA CHỌN ĐẶC TRƯNG (VERSION A)
-# ==========================================
 file_name = "Vietnam_Crop_Feature_Engineered.csv"
 try:
     df = pd.read_csv(file_name)
@@ -42,19 +39,13 @@ y = df_clean['Crop_Label']
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
 
-# ==========================================
-# 2. HUẤN LUYỆN MÔ HÌNH (CẤU HÌNH TỐI ƯU MỚI)
-# ==========================================
 print("▶️ Đang huấn luyện Random Forest (n_estimators=300, max_depth=15)...")
-# Đã bỏ class_weight='balanced' vì dataset gốc đã cân bằng
 model = RandomForestClassifier(n_estimators=300, max_depth=15, random_state=42)
 model.fit(X_train, y_train)
 classes = model.classes_
 print(" ✅ Huấn luyện hoàn tất!\n")
 
-# ==========================================
-# 3. ĐÁNH GIÁ (NĂNG LỰC LÕI)
-# ==========================================
+
 print(" 📊 BÁO CÁO NĂNG LỰC MÔ HÌNH LÕI (Không rò rỉ dữ liệu) ")
 y_pred = model.predict(X_test)
 probas = model.predict_proba(X_test)
@@ -64,9 +55,7 @@ print(f"   - Top-2 Accuracy: {top_k_accuracy_score(y_test, probas, k=2, labels=c
 print(f"   - Top-3 Accuracy: {top_k_accuracy_score(y_test, probas, k=3, labels=classes)*100:.2f}% (Rất phù hợp để làm Recommendation)\n")
 
 
-# ==========================================
-# 4. INFERENCE ENGINE: ÁP DỤNG "SOFT PENALTY" ĐỂ FIX NHẦM LẪN
-# ==========================================
+
 print("="*85)
 print(" 🤖 CHẠY THỬ NGHIỆM INFERENCE KÈM BỘ LỌC SOFT PENALTY ")
 print("="*85)
@@ -94,18 +83,13 @@ for case in [test_case_1, test_case_2]:
     raw_probas = model.predict_proba(case_df)[0]
     preds = {classes[i]: raw_probas[i] * 100 for i in range(len(classes))}
 
-    # -------------------------------------------------------------
-    # BỘ LỌC SOFT PENALTY (Fix nhầm lẫn từ Confusion Matrix)
-    # -------------------------------------------------------------
+
     warnings_list = []
-    
-    # Fix 1: Rice vs Maize (Nếu thiếu nước mùa khô cao -> Phạt nặng lúa, phạt nhẹ ngô)
     if case['Dry_Season_Deficit (mm)'] > 200:
         preds['Rice'] *= 0.3
         preds['Maize'] *= 0.8
         warnings_list.append("Thâm hụt nước cao (Lúa bị giảm ưu tiên)")
 
-    # Fix 2: Pepper vs Coffee vs Rubber (Tiêu sợ chua, Cà phê cần dinh dưỡng, Cao su dễ sống)
     if case['Acidification_Risk (index)'] > 3000 or case['phh2o (pH)'] < 4.5:
         preds['Pepper'] *= 0.4
         preds['Coffee'] *= 0.5
@@ -116,11 +100,9 @@ for case in [test_case_1, test_case_2]:
         preds['Coffee'] *= 0.7 # Cà phê thiếu dinh dưỡng sẽ kém
         warnings_list.append("Đất nghèo Nitơ")
 
-    # Chuẩn hóa lại tổng xác suất về 100% sau khi phạt
     total_prob = sum(preds.values())
     preds = {k: (v / total_prob) * 100 for k, v in preds.items()}
 
-    # Sắp xếp kết quả
     sorted_preds = sorted(preds.items(), key=lambda x: x[1], reverse=True)
     
     results_list.append({
