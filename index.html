@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hệ thống gợi ý cây trồng</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="hero-panel">
+        <div class="hero-copy">
+          <span class="eyebrow">Mô phỏng tư vấn nông nghiệp</span>
+          <h1>Hệ thống gợi ý cây trồng</h1>
+          <p>
+            Nhập thông số đất đai và khí hậu của khu vực để xếp hạng các cây
+            trồng phù hợp theo chỉ số thích nghi.
+          </p>
+        </div>
+        <div class="hero-stats" aria-label="Tóm tắt dữ liệu demo">
+          <div>
+            <strong id="cropCount">0</strong>
+            <span>Loại cây</span>
+          </div>
+          <div>
+            <strong id="metricCount">8</strong>
+            <span>Chỉ số</span>
+          </div>
+          <div>
+            <strong id="recordCount">0</strong>
+            <span>Dòng dữ liệu</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="workspace">
+        <form class="input-panel" id="recommendationForm">
+          <div class="section-title">
+            <span class="section-icon">⌁</span>
+            <div>
+              <h2>Nhập thông số khu vực</h2>
+              <p>Dữ liệu mô phỏng lấy từ Vietnam_Crop_Dataset_Cleaned.csv.</p>
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <label class="field">
+              <span>Vùng canh tác</span>
+              <select id="region" name="region">
+                <option value="DBSCL">ĐBSCL - Đồng bằng sông Cửu Long</option>
+                <option value="DBSH">ĐBSH - Đồng bằng sông Hồng</option>
+                <option value="Tay_Nguyen">Tây Nguyên</option>
+              </select>
+            </label>
+
+            <label class="field">
+              <span>Tháng gieo trồng</span>
+              <select id="plantingMonth" name="plantingMonth">
+                <option value="1">Tháng 1</option>
+                <option value="2">Tháng 2</option>
+                <option value="3">Tháng 3</option>
+                <option value="4" selected>Tháng 4</option>
+                <option value="5">Tháng 5</option>
+                <option value="6">Tháng 6</option>
+                <option value="7">Tháng 7</option>
+                <option value="8">Tháng 8</option>
+                <option value="9">Tháng 9</option>
+                <option value="10">Tháng 10</option>
+                <option value="11">Tháng 11</option>
+                <option value="12">Tháng 12</option>
+              </select>
+            </label>
+
+            <label class="field">
+              <span>Độ pH đất</span>
+              <input id="ph" name="ph" type="number" min="3" max="9" step="0.1" value="5.9" />
+              <em>pH</em>
+            </label>
+
+            <label class="field">
+              <span>Nhiệt độ trung bình</span>
+              <input id="temperature" name="temperature" type="number" min="5" max="45" step="0.1" value="27.6" />
+              <em>°C</em>
+            </label>
+
+            <label class="field">
+              <span>Độ ẩm trung bình</span>
+              <input id="humidity" name="humidity" type="number" min="20" max="100" step="0.1" value="82.3" />
+              <em>%</em>
+            </label>
+
+            <label class="field">
+              <span>Hàm lượng Nitơ</span>
+              <input id="nitrogen" name="nitrogen" type="number" min="0" max="120" step="0.1" value="30.8" />
+              <em>g/kg</em>
+            </label>
+
+            <label class="field">
+              <span>Tỷ lệ sét</span>
+              <input id="clay" name="clay" type="number" min="0" max="100" step="0.1" value="35.6" />
+              <em>%</em>
+            </label>
+
+            <label class="field">
+              <span>Tỷ lệ cát</span>
+              <input id="sand" name="sand" type="number" min="0" max="100" step="0.1" value="26.5" />
+              <em>%</em>
+            </label>
+
+            <label class="field">
+              <span>Lượng mưa hằng năm</span>
+              <input id="rainfall" name="rainfall" type="number" min="200" max="4000" step="10" value="1803" />
+              <em>mm</em>
+            </label>
+
+            <label class="field">
+              <span>Độ cao</span>
+              <input id="elevation" name="elevation" type="number" min="0" max="2500" step="1" value="3" />
+              <em>m</em>
+            </label>
+          </div>
+
+          <div class="actions">
+            <button class="primary-button" type="submit">
+              <span>🔎</span>
+              Tìm cây trồng phù hợp
+            </button>
+            <button class="ghost-button" type="button" id="demoLowland">Mẫu đồng bằng</button>
+            <button class="ghost-button" type="button" id="demoHighland">Mẫu cao nguyên</button>
+          </div>
+        </form>
+
+        <aside class="summary-panel" aria-live="polite">
+          <span class="summary-label">Cây tối ưu hiện tại</span>
+          <div class="best-crop">
+            <span class="best-icon" id="bestIcon">🌾</span>
+            <div>
+              <h2 id="bestCropName">Lúa</h2>
+              <p id="bestCropReason">Đang tính toán từ dữ liệu đầu vào.</p>
+            </div>
+          </div>
+          <div class="score-ring" aria-label="Điểm phù hợp cao nhất">
+            <svg viewBox="0 0 120 120" role="img">
+              <circle class="ring-bg" cx="60" cy="60" r="52"></circle>
+              <circle class="ring-value" id="scoreRing" cx="60" cy="60" r="52"></circle>
+            </svg>
+            <div>
+              <strong id="bestScore">0%</strong>
+              <span id="bestLevel">Đang đánh giá</span>
+            </div>
+          </div>
+          <dl class="summary-list">
+            <div>
+              <dt>Yếu tố mạnh nhất</dt>
+              <dd id="strongMetric">-</dd>
+            </div>
+            <div>
+              <dt>Cần cân nhắc</dt>
+              <dd id="weakMetric">-</dd>
+            </div>
+            <div>
+              <dt>Mùa vụ gợi ý</dt>
+              <dd id="bestSeason">-</dd>
+            </div>
+          </dl>
+        </aside>
+      </section>
+
+      <section class="dashboard-grid">
+        <article class="chart-panel">
+          <div class="section-title compact">
+            <span class="section-icon">▰</span>
+            <div>
+              <h2>Biểu đồ so sánh điểm phù hợp</h2>
+              <p>Cây có điểm cao hơn sẽ được xếp ưu tiên phía trên.</p>
+            </div>
+          </div>
+          <div class="bar-chart" id="barChart" aria-label="Biểu đồ điểm phù hợp"></div>
+        </article>
+
+        <article class="chart-panel">
+          <div class="section-title compact">
+            <span class="section-icon">◎</span>
+            <div>
+              <h2>Hồ sơ thích nghi của cây tối ưu</h2>
+              <p>Các trục thể hiện mức khớp của từng nhóm điều kiện.</p>
+            </div>
+          </div>
+          <div class="radar-wrap">
+            <svg id="radarChart" viewBox="0 0 360 300" role="img" aria-label="Biểu đồ radar hồ sơ cây tối ưu"></svg>
+          </div>
+        </article>
+      </section>
+
+      <section class="results-section">
+        <div class="section-title">
+          <span class="section-icon">☷</span>
+          <div>
+            <h2>Danh sách cây phù hợp</h2>
+            <p>Mỗi cây có điểm tổng, mức đánh giá và chi tiết từng chỉ số.</p>
+          </div>
+        </div>
+        <div class="result-list" id="resultList"></div>
+      </section>
+    </main>
+
+    <section class="chatbot" id="chatbot" aria-label="Trợ lý tư vấn cây trồng">
+      <button class="chatbot-toggle" id="chatToggle" type="button" aria-label="Mở trợ lý tư vấn">
+        AI
+      </button>
+
+      <div class="chatbot-panel" role="dialog" aria-modal="false" aria-labelledby="chatTitle">
+        <header class="chatbot-header">
+          <div>
+            <span>Trợ lý tư vấn</span>
+            <h2 id="chatTitle">Hỏi nhanh về cây trồng</h2>
+          </div>
+          <button class="chatbot-close" id="chatClose" type="button" aria-label="Đóng trợ lý">×</button>
+        </header>
+
+        <div class="chatbot-messages" id="chatMessages" aria-live="polite"></div>
+
+        <div class="chatbot-suggestions" aria-label="Câu hỏi gợi ý">
+          <button type="button" data-chat-prompt="Tóm tắt kết quả hiện tại">Tóm tắt</button>
+          <button type="button" data-chat-prompt="Tôi nên trồng cây nào?">Cây tối ưu</button>
+          <button type="button" data-chat-prompt="Chỉ số nào cần cải thiện?">Cần cải thiện</button>
+        </div>
+
+        <form class="chatbot-form" id="chatForm">
+          <input
+            id="chatInput"
+            name="message"
+            type="text"
+            autocomplete="off"
+            placeholder="Nhập câu hỏi của bạn..."
+            aria-label="Nhập câu hỏi cho trợ lý"
+          />
+          <button type="submit" aria-label="Gửi câu hỏi">&gt;</button>
+        </form>
+      </div>
+    </section>
+
+    <script src="app.js"></script>
+  </body>
+</html>
