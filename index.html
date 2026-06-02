@@ -10,11 +10,11 @@
     <main class="app-shell">
       <section class="hero-panel">
         <div class="hero-copy">
-          <span class="eyebrow">Mô phỏng tư vấn nông nghiệp</span>
+          <span class="eyebrow">Tư vấn nông nghiệp bằng dữ liệu mới</span>
           <h1>Hệ thống gợi ý cây trồng</h1>
           <p>
-            Nhập thông số đất đai và khí hậu của khu vực để xếp hạng các cây
-            trồng phù hợp theo chỉ số thích nghi.
+            Nhập 10 đặc trưng đúng theo bộ dữ liệu feature-engineered để xếp hạng cây
+            trồng bằng model Flask và bộ lọc soft penalty mới.
           </p>
         </div>
         <div class="hero-stats" aria-label="Tóm tắt dữ liệu demo">
@@ -23,8 +23,8 @@
             <span>Loại cây</span>
           </div>
           <div>
-            <strong id="metricCount">8</strong>
-            <span>Chỉ số</span>
+            <strong id="metricCount">10</strong>
+            <span>Đặc trưng model</span>
           </div>
           <div>
             <strong id="recordCount">0</strong>
@@ -39,20 +39,11 @@
             <span class="section-icon">⌁</span>
             <div>
               <h2>Nhập thông số khu vực</h2>
-              <p>Dữ liệu mô phỏng lấy từ Vietnam_Crop_Dataset_Cleaned.csv.</p>
+              <p>Dữ liệu lấy từ Vietnam_Crop_Feature_Engineered.csv và feature set của model hoàn thiện.</p>
             </div>
           </div>
 
           <div class="form-grid">
-            <label class="field">
-              <span>Vùng canh tác</span>
-              <select id="region" name="region">
-                <option value="DBSCL">ĐBSCL - Đồng bằng sông Cửu Long</option>
-                <option value="DBSH">ĐBSH - Đồng bằng sông Hồng</option>
-                <option value="Tay_Nguyen">Tây Nguyên</option>
-              </select>
-            </label>
-
             <label class="field">
               <span>Tháng gieo trồng</span>
               <select id="plantingMonth" name="plantingMonth">
@@ -84,12 +75,6 @@
             </label>
 
             <label class="field">
-              <span>Độ ẩm trung bình</span>
-              <input id="humidity" name="humidity" type="number" min="20" max="100" step="0.1" value="82.3" />
-              <em>%</em>
-            </label>
-
-            <label class="field">
               <span>Hàm lượng Nitơ</span>
               <input id="nitrogen" name="nitrogen" type="number" min="0" max="120" step="0.1" value="30.8" />
               <em>g/kg</em>
@@ -108,14 +93,32 @@
             </label>
 
             <label class="field">
-              <span>Lượng mưa hằng năm</span>
-              <input id="rainfall" name="rainfall" type="number" min="200" max="4000" step="10" value="1803" />
+              <span>Tỷ lệ thịt/bùn</span>
+              <input id="silt" name="silt" type="number" min="0" max="100" step="0.1" value="40" />
+              <em>%</em>
+            </label>
+
+            <label class="field">
+              <span>Thiếu nước mùa khô</span>
+              <input id="drySeasonDeficit" name="drySeasonDeficit" type="number" min="0" max="500" step="0.1" value="100" />
               <em>mm</em>
             </label>
 
             <label class="field">
+              <span>Rủi ro chua/phèn</span>
+              <input id="acidificationRisk" name="acidificationRisk" type="number" min="0" max="10000" step="0.1" value="4000" />
+              <em>index</em>
+            </label>
+
+            <label class="field">
+              <span>Chỉ số tập trung mưa</span>
+              <input id="rainConcentrationIndex" name="rainConcentrationIndex" type="number" min="0" max="1" step="0.001" value="0.85" />
+              <em>RCI</em>
+            </label>
+
+            <label class="field">
               <span>Độ cao</span>
-              <input id="elevation" name="elevation" type="number" min="0" max="2500" step="1" value="3" />
+              <input id="elevation" name="elevation" type="number" min="0" max="2500" step="1" value="15" />
               <em>m</em>
             </label>
           </div>
@@ -125,8 +128,8 @@
               <span>🔎</span>
               Tìm cây trồng phù hợp
             </button>
-            <button class="ghost-button" type="button" id="demoLowland">Mẫu đồng bằng</button>
-            <button class="ghost-button" type="button" id="demoHighland">Mẫu cao nguyên</button>
+            <button class="ghost-button" type="button" id="demoLowland" aria-pressed="false">Mẫu đất phèn</button>
+            <button class="ghost-button" type="button" id="demoHighland" aria-pressed="false">Mẫu khô hạn</button>
           </div>
         </form>
 
@@ -172,7 +175,7 @@
             <span class="section-icon">▰</span>
             <div>
               <h2>Biểu đồ so sánh điểm phù hợp</h2>
-              <p>Cây có điểm cao hơn sẽ được xếp ưu tiên phía trên.</p>
+              <p>Cây có điểm cao hơn sẽ được xếp ưu tiên phía trên sau soft penalty.</p>
             </div>
           </div>
           <div class="bar-chart" id="barChart" aria-label="Biểu đồ điểm phù hợp"></div>
@@ -183,7 +186,7 @@
             <span class="section-icon">◎</span>
             <div>
               <h2>Hồ sơ thích nghi của cây tối ưu</h2>
-              <p>Các trục thể hiện mức khớp của từng nhóm điều kiện.</p>
+              <p>Các trục thể hiện mức khớp của các đặc trưng model quan trọng.</p>
             </div>
           </div>
           <div class="radar-wrap">
@@ -197,7 +200,7 @@
           <span class="section-icon">☷</span>
           <div>
             <h2>Danh sách cây phù hợp</h2>
-            <p>Mỗi cây có điểm tổng, mức đánh giá và chi tiết từng chỉ số.</p>
+            <p>Mỗi cây có điểm tổng, mức đánh giá và chi tiết 10 đặc trưng của model.</p>
           </div>
         </div>
         <div class="result-list" id="resultList"></div>

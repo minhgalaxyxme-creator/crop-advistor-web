@@ -280,6 +280,28 @@ p {
   font-weight: 800;
 }
 
+.ghost-button.selected {
+  border-color: rgba(63, 143, 65, 0.75);
+  background: linear-gradient(135deg, rgba(63, 143, 65, 0.16), rgba(116, 185, 67, 0.24));
+  color: var(--green);
+  box-shadow: 0 0 0 3px rgba(63, 143, 65, 0.14);
+  transform: translateY(-1px);
+}
+
+.ghost-button.selected::before {
+  content: "✓";
+  display: inline-grid;
+  width: 20px;
+  height: 20px;
+  margin-right: 8px;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--green);
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
 .primary-button {
   display: inline-flex;
   gap: 9px;
@@ -962,4 +984,14 @@ p {
   .chatbot-messages {
     max-height: min(420px, calc(100vh - 235px));
   }
+}
+
+.model-warning {
+  margin-bottom: 14px;
+  padding: 14px 16px;
+  border: 1px solid rgba(223, 172, 49, 0.5);
+  border-radius: var(--radius);
+  background: rgba(255, 246, 214, 0.92);
+  color: #6f4f05;
+  line-height: 1.45;
 }
