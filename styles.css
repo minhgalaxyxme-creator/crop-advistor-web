@@ -963,3 +963,13 @@ p {
     max-height: min(420px, calc(100vh - 235px));
   }
 }
+
+.model-warning {
+  margin-bottom: 14px;
+  padding: 14px 16px;
+  border: 1px solid rgba(223, 172, 49, 0.5);
+  border-radius: var(--radius);
+  background: rgba(255, 246, 214, 0.92);
+  color: #6f4f05;
+  line-height: 1.45;
+}
